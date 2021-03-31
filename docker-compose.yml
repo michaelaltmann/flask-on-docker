@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 services:
   web:
@@ -9,17 +9,30 @@ services:
     ports:
       - 5000:5000
     env_file:
-      - ./.env.dev
+      - ./.env.dev.web
+    depends_on:
+      - db
+  web2:
+    build: ./services/web2
+    command: python manage.py run -h 0.0.0.0
+    volumes:
+      - ./services/web2/:/usr/src/app/
+    ports:
+      - 5002:5002
+    env_file:
+      - ./.env.dev.web2
     depends_on:
       - db
   db:
-    image: postgres:12-alpine
+    image: arturhg/multi-postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
     environment:
-      - POSTGRES_USER=hello_flask
-      - POSTGRES_PASSWORD=hello_flask
-      - POSTGRES_DB=hello_flask_dev
+      - PG_USERS=hello_flask,web2
+      - PG_PASSWORDS=hello_flask,web2
+      - PG_DATABASES=hello_flask_dev,web2_dev
 
 volumes:
   postgres_data:

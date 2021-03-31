@@ -13,6 +13,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
+
 app.config.from_object("project.config.Config")
 db = SQLAlchemy(app)
 
@@ -30,7 +31,7 @@ class User(db.Model):
 
 @app.route("/")
 def hello_world():
-    return jsonify(hello="world")
+    return jsonify(hello="world of web2")
 
 
 @app.route("/static/<path:filename>")

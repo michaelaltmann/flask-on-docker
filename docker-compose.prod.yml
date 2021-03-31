@@ -1,7 +1,8 @@
-version: '3.7'
+version: "3.7"
 
 services:
   web:
+    image: 216407560218.dkr.ecr.us-east-2.amazonaws.com/docker-reg:web
     build:
       context: ./services/web
       dockerfile: Dockerfile.prod
@@ -12,7 +13,22 @@ services:
     expose:
       - 5000
     env_file:
-      - ./.env.prod
+      - ./.env.prod.web
+    depends_on:
+      - db
+  web2:
+    image: 216407560218.dkr.ecr.us-east-2.amazonaws.com/docker-reg:web2
+    build:
+      context: ./services/web2
+      dockerfile: Dockerfile.prod
+    command: gunicorn --bind 0.0.0.0:5002 manage:app
+    volumes:
+      - static_volume_web2:/home/app/web2/project/static
+      - media_volume_web2:/home/app/web2/project/media
+    expose:
+      - 5002
+    env_file:
+      - ./.env.prod.web2
     depends_on:
       - db
   db:
@@ -22,12 +38,16 @@ services:
     env_file:
       - ./.env.prod.db
   nginx:
+    image: 216407560218.dkr.ecr.us-east-2.amazonaws.com/docker-reg:nginx
     build: ./services/nginx
     volumes:
       - static_volume:/home/app/web/project/static
       - media_volume:/home/app/web/project/media
+      - static_volume_web2:/home/app/web2/project/static
+      - media_volume_web2:/home/app/web2/project/media
     ports:
-      - 1337:80
+      - 80:80
+      - 443:443
     depends_on:
       - web
 
@@ -35,3 +55,5 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
+  static_volume_web2:
+  media_volume_web2:

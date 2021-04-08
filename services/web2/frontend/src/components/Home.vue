@@ -25,7 +25,7 @@ export default {
       this.randomNumber = this.getRandomInt(1, 100)
     },
     getRandomFromBackend() {
-      const path = `http://localhost:5000/api/random`
+      const path = `http://localhost:5002/api/random`
       axios
         .get(path)
         .then(response => {

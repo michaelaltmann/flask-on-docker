@@ -1,6 +1,8 @@
 version: "3.7"
+# Docker compose for a network with a database and two web apps
 
 services:
+  # A web app with server-side rendering that use a db
   web:
     build: ./services/web
     command: python manage.py run -h 0.0.0.0
@@ -12,17 +14,35 @@ services:
       - ./.env.dev.web
     depends_on:
       - db
-  web2:
-    build: ./services/web2
-    command: python manage.py run -h 0.0.0.0
+
+  # The API for a web app with client-side rendering that use a db
+  web2backend:
+    build:
+      context: ./services/web2/backend/
+      dockerfile: Dockerfile
     volumes:
-      - ./services/web2/:/usr/src/app/
+      - ./services/web2/backend:/usr/src/app/backend
     ports:
       - 5002:5002
+    command: flask run --host=0.0.0.0 --port=5002
+    env_file:
+      - ./.env.dev.web2
+
+  # The front end for a web app with client-side rendering that use a db
+  web2frontend:
+    build:
+      context: ./services/web2/frontend/
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/web2/frontend:/usr/src/app/frontend
+    ports:
+      - 8080:8080
     env_file:
       - ./.env.dev.web2
     depends_on:
       - db
+
+  # Postgres db that is shared by both web apps.
   db:
     image: arturhg/multi-postgres
     volumes:
